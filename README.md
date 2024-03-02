@@ -1,2 +1,1 @@
-# data-science-with-python-2022
-Data Science with Pyhton 2022
+project outline for solving the Cutting Stock Problem using the Knapsack algorithm
