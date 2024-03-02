@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cutting Stock Problem Solver</title>
+  <style>
+    /* Mocca Theme Styles */
+    body {
+      font-family: Arial, sans-serif;
+      background-color: #f6f6f6;
+      margin: 0;
+      padding: 0;
+    }
+
+    .container {
+      width: 80%;
+      margin: 0 auto;
+      padding: 20px;
+    }
+
+    header {
+      background-color: #573D34;
+      color: #fff;
+      padding: 20px 0;
+      text-align: center;
+    }
+
+    header h1 {
+      margin: 0;
+      font-size: 36px;
+    }
+
+    nav ul {
+      list-style-type: none;
+      padding: 0;
+      margin: 0;
+    }
+
+    nav ul li {
+      display: inline;
+      margin-right: 20px;
+    }
+
+    nav ul li a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    .hero {
+      background-color: #573D34;
+      color: #fff;
+      padding: 100px 0;
+      text-align: center;
+    }
+
+    .hero h2 {
+      font-size: 48px;
+      margin-bottom: 20px;
+    }
+
+    .hero p {
+      font-size: 20px;
+      margin-bottom: 40px;
+    }
+
+    .btn {
+      background-color: #fff;
+      color: #573D34;
+      padding: 10px 20px;
+      text-decoration: none;
+      border-radius: 5px;
+    }
+
+    footer {
+      background-color: #573D34;
+      color: #fff;
+      padding: 20px 0;
+      text-align: center;
+    }
+
+    footer p {
+      margin: 0;
+    }
+
+    .social-icons {
+      list-style-type: none;
+      padding: 0;
+      margin-top: 20px;
+    }
+
+    .social-icons li {
+      display: inline;
+      margin-right: 10px;
+    }
+
+    .social-icons li img {
+      width: 30px;
+      height: auto;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="container">
+      <h1>Cutting Stock Problem Solver</h1>
+    </div>
+  </header>
+
+  <section class="hero">
+    <div class="container">
+      <h2>Welcome to Cutting Stock Problem Solver</h2>
+      <p>Solve your cutting stock problems with ease.</p>
+      <button class="btn" onclick="solve()">Solve</button>
+    </div>
+  </section>
+
+  <div class="container">
+    <label>
+      Choose the type of Cutting Stock Problem:
+      <select id="problemType">
+        <option value="1">One-dimensional Cutting Stock Problem (1D CSP)</option>
+        <option value="2">Two-dimensional Cutting Stock Problem (2D CSP)</option>
+        <option value="3">Three-dimensional Cutting Stock Problem (3D CSP)</option>
+      </select>
+    </label>
+    <div id="inputs"></div>
+    <div id="results"></div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <p>&copy; 2024 Cutting Stock Problem Solver. All rights reserved.</p>
+      <ul class="social-icons">
+        <li><a href="#"><img src="facebook-icon.png" alt="Facebook"></a></li>
+        <li><a href="#"><img src="twitter-icon.png" alt="Twitter"></a></li>
+        <li><a href="#"><img src="instagram-icon.png" alt="Instagram"></a></li>
+      </ul>
+    </div>
+  </footer>
+
+  <script>
+    function solve() {
+      const problemType = document.getElementById("problemType").value;
+      const resultsDiv = document.getElementById("results");
+      resultsDiv.innerHTML = ""; // Clear previous results
+
+      if (problemType === "1") {
+        let stockLength;
+        let requiredLengths;
+        let requiredQuantities;
+
+        try {
+          stockLength = parseInt(prompt("Enter the length of the stock material:"));
+          requiredLengths = prompt("Enter the lengths of required pieces (comma-separated):").split(',').map(Number);
+          requiredQuantities = prompt("Enter the quantities of required pieces (comma-separated):").split(',').map(Number);
+
+          // Validate input data
+          if (!validateInput(stockLength, requiredLengths, requiredQuantities)) {
+            throw new Error("Invalid input data. Please enter positive integers only.");
+          }
+        } catch (error) {
+          resultsDiv.innerHTML = `<p>Error: ${error.message}</p>`;
+          return;
+        }
+
+        // Call solve1DCSP function and display results
+        const [maxQuantity, cuttingSolution] = solve1DCSP(stockLength, requiredLengths, requiredQuantities);
+        resultsDiv.innerHTML = `<p>Maximum quantity that can be produced: ${maxQuantity}</p>`;
+        resultsDiv.innerHTML += `<p>Cutting solution: ${cuttingSolution.join(', ')}</p>`;
+      } else if (problemType === "2") {
+        let stockWidth;
+        let stockHeight;
+        let requiredRectangles;
+
+        try {
+          stockWidth = parseInt(prompt("Enter the width of the stock material:"));
+          stockHeight = parseInt(prompt("Enter the height of the stock material:"));
+          requiredRectangles = [];
+          const numRectangles = parseInt(prompt("Enter the number of required rectangles:"));
+          for (let i = 0; i < numRectangles; i++) {
+            const dimensions = prompt(`Enter dimensions of rectangle ${i+1} (width, height):`).split(',').map(Number);
+            requiredRectangles.push(dimensions);
+          }
+
+          // Validate input data
+          if (!validateInput2D(stockWidth, stockHeight, requiredRectangles)) {
+            throw new Error("Invalid input data. Please enter positive integers only.");
+          }
+        } catch (error) {
+          resultsDiv.innerHTML = `<p>Error: ${error.message}</p>`;
+          return;
+        }
+
+        // Call solve2DCSP function and display results
+        const [maxQuantity, cuttingSolution] = solve2DCSP(stockWidth, stockHeight, requiredRectangles);
+        resultsDiv.innerHTML = `<p>Maximum quantity of rectangles that can be produced: ${maxQuantity}</p>`;
+        resultsDiv.innerHTML += `<p>Cutting solution (dimensions of rectangles): ${JSON.stringify(cuttingSolution)}</p>`;
+      } else if (problemType === "3") {
+        let stockWidth;
+        let stockHeight;
+        let stockLength;
+        let requiredBoxes;
+
+        try {
+          stockWidth = parseInt(prompt("Enter the width of the stock material:"));
+          stockHeight = parseInt(prompt("Enter the height of the stock material:"));
+          stockLength = parseInt(prompt("Enter the length of the stock material:"));
+          requiredBoxes = [];
+          const numBoxes = parseInt(prompt("Enter the number of required boxes:"));
+          for (let i = 0; i < numBoxes; i++) {
+            const dimensions = prompt(`Enter dimensions of box ${i+1} (width, height, length):`).split(',').map(Number);
+            requiredBoxes.push(dimensions);
+          }
+
+          // Validate input data
+          if (!validateInput3D(stockWidth, stockHeight, stockLength, requiredBoxes)) {
+            throw new Error("Invalid input data. Please enter positive integers only.");
+          }
+        } catch (error) {
+          resultsDiv.innerHTML = `<p>Error: ${error.message}</p>`;
+          return;
+        }
+
+        // Call solve3DCSP function and display results
+        const [maxQuantity, cuttingSolution] = solve3DCSP(stockWidth, stockHeight, stockLength, requiredBoxes);
+        resultsDiv.innerHTML = `<p>Maximum quantity of boxes that can be produced: ${maxQuantity}</p>`;
+        resultsDiv.innerHTML += `<p>Cutting solution (dimensions of boxes): ${JSON.stringify(cuttingSolution)}</p>`;
+      } else {
+        resultsDiv.innerHTML = "<p>Invalid problem type selected.</p>";
+      }
+    }
+
+    function validateInput(stockLength, requiredLengths, requiredQuantities) {
+      if (isNaN(stockLength) || stockLength <= 0) {
+        return false;
+      }
+      for (const length of requiredLengths) {
+        if (isNaN(length) || length <= 0) {
+          return false;
+        }
+      }
+      for (const quantity of requiredQuantities) {
+        if (isNaN(quantity) || quantity <= 0) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function validateInput2D(stockWidth, stockHeight, requiredRectangles) {
+      if (isNaN(stockWidth) || isNaN(stockHeight) || stockWidth <= 0 || stockHeight <= 0) {
+        return false;
+      }
+      for (const [width, height] of requiredRectangles) {
+        if (isNaN(width) || isNaN(height) || width <= 0 || height <= 0) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function validateInput3D(stockWidth, stockHeight, stockLength, requiredBoxes) {
+      if (isNaN(stockWidth) || isNaN(stockHeight) || isNaN(stockLength) || stockWidth <= 0 || stockHeight <= 0 || stockLength <= 0) {
+        return false;
+      }
+      for (const [width, height, length] of requiredBoxes) {
+        if (isNaN(width) || isNaN(height) || isNaN(length) || width <= 0 || height <= 0 || length <= 0) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    function solve1DCSP(stockLength, requiredLengths, requiredQuantities) {
+      // Implement your 1D cutting stock problem solving logic here using Dynamic Programming
+      // This is a placeholder function with a basic example
+      const dp = new Array(stockLength + 1).fill(0);
+      for (let i = 1; i <= stockLength; i++) {
+        for (let j = 0; j < requiredLengths.length; j++) {
+          if (i >= requiredLengths[j]) {
+            dp[i] = Math.max(dp[i], dp[i - requiredLengths[j]] + requiredQuantities[j]);
+          }
+        }
+      }
+      const maxQuantity = dp[stockLength];
+
+      // Generate cutting solution (optional)
+      const cuttingSolution = [];
+      let remainingLength = stockLength;
+      for (let i = requiredLengths.length - 1; i >= 0; i--) {
+        while (remainingLength >= requiredLengths[i] && dp[remainingLength] === dp[remainingLength - requiredLengths[i]] + requiredQuantities[i]) {
+          cuttingSolution.push(requiredLengths[i]);
+          remainingLength -= requiredLengths[i];
+        }
+      }
+
+      return [maxQuantity, cuttingSolution];
+    }
+
+    function solve2DCSP(stockWidth, stockHeight, requiredRectangles) {
+        const sortedRectangles = requiredRectangles.sort((a, b) => b[0] * b[1] - a[0] * a[1]); // Sort by area (descending)
+
+        let remainingWidth = stockWidth;
+        let remainingHeight = stockHeight;
+        let maxQuantity = 0;
+        const cuttingSolution = [];
+
+        for (const [width, height] of sortedRectangles) {
+            if (width <= remainingWidth && height <= remainingHeight) {
+                const quantity = Math.floor(remainingWidth / width) * Math.floor(remainingHeight / height);
+                maxQuantity += quantity;
+                cuttingSolution.push([width, height]);
+                remainingWidth -= width * Math.floor(quantity / (stockHeight / height));
+                if (remainingWidth < width) {
+                    remainingWidth = stockWidth;
+                    remainingHeight -= height * Math.floor(quantity / (stockWidth / width));
+                }
+            }
+        }
+
+        return [maxQuantity, cuttingSolution];
+    }
+
+    function solve3DCSP(stockWidth, stockHeight, stockLength, requiredBoxes) {
+            const sortedBoxes = requiredBoxes.sort((a, b) => b[0] * b[1] * b[2] - a[0] * a[1] * a[2]); // Sort by volume (descending)
+
+            let remainingWidth = stockWidth;
+            let remainingHeight = stockHeight;
+            let remainingLength = stockLength;
+            let maxQuantity = 0;
+            const cuttingSolution = [];
+
+            for (const [width, height, length] of sortedBoxes) {
+                if (width <= remainingWidth && height <= remainingHeight && length <= remainingLength) {
+                    const quantity = Math.floor(remainingWidth / width) * Math.floor(remainingHeight / height) * Math.floor(remainingLength / length);
+                    maxQuantity += quantity;
+                    cuttingSolution.push([width, height, length]);
+                    remainingWidth -= width * Math.floor(quantity / (stockHeight / height)) * Math.floor(quantity / (stockLength / length));
+                    if (remainingWidth < width) {
+                        remainingWidth = stockWidth;
+                        remainingHeight -= height * Math.floor(quantity / (stockWidth / width)) * Math.floor(quantity / (stockLength / length));
+                        if (remainingHeight < height) {
+                            remainingHeight = stockHeight;
+                            remainingLength -= length * Math.floor(quantity / (stockWidth / width)) * Math.floor(quantity / (stockHeight / height));
+                        }
+                    }
+                }
+            }
+
+            return [maxQuantity, cuttingSolution];
+        }
+
+
+  </script>
+</body>
+</html>
