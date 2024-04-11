@@ -2,8 +2,13 @@
 
 ## Overview
 
+
 ### Purpose
 The purpose of this project is to apply the Knapsack Algorithm to solve various types of Cutting Stock Problems (CSP).
+
+### what is cutting stock problem?
+
+The Cutting Stock Problem is a classic optimization problem in operations research and mathematics. It involves cutting raw materials, such as rolls of paper, steel rods, or wood, into smaller pieces to fulfill a set of demands while minimizing waste. The goal is to find the most efficient way to cut the raw material to meet the demand.
 
 ### Types of CSP
 
